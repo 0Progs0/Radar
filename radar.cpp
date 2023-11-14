@@ -21,38 +21,6 @@ QHash<int, QByteArray> Radar::roleNames() const {
     return roles;
 }
 
-void Radar::addMarker(const QGeoCoordinate &coordinate) {
-
-    QGeoCoordinate fVertex = findFirstVertex(coordinate);
-    QGeoCoordinate sVertex = findSecondVertex(coordinate);
-    std::cout << fVertex.latitude() << std::endl;
-    std::cout << fVertex.longitude() << std::endl;
-    std::cout << sVertex.latitude() << std::endl;
-    std::cout << sVertex.longitude() << std::endl;
-    beginInsertRows(QModelIndex(), 0, rowCount());
-    m_coordinates.append(coordinate);
-    m_coordinates.append(fVertex);
-    m_coordinates.append(sVertex);
-    endInsertRows();
-
-    }
-
-
-void Radar::removeMarker(const QGeoCoordinate &coordinate) {
-    if (rowCount() != 0) {
-        for (int i = 0; i < rowCount(); i++) {
-            if ((coordinate.latitude() == m_coordinates.at(i).latitude())&&(coordinate.longitude() == m_coordinates.at(i).longitude()))
-            {
-                 beginRemoveRows(QModelIndex(),  0,  rowCount()-1);
-
-                 m_coordinates.removeAt(i);
-
-                 endRemoveRows();
-           }
-       }
-
-    }
-}
 
 QGeoCoordinate Radar::findFirstVertex(const QGeoCoordinate &coordinate)
 {
