@@ -11,29 +11,9 @@ ApplicationWindow {
     ListModel {
         id: polygonModel
 
-        ListElement {
-            coordsArray : [
-                    ListElement {
-                    latitude:59.91288302222718
-                    longitude:30.728799819940349
-                    },
-                    ListElement {
-                    latitude:59.91821810440818
-                    longitude:30.737211227411649
-                    },
-                    ListElement {
-                    latitude:59.912323649434825
-                    longitude:30.754119873037723
-                    }
-                   ]
-        }
+
     }
 
-    ListView {
-            anchors.fill: parent
-            model: polygonModel
-            delegate: polygonDelegate
-    }
 
     Map {
         id:map
@@ -63,19 +43,15 @@ ApplicationWindow {
                                 {latitude:secondCoord.latitude, longitude:secondCoord.longitude},
                                 {latitude:thirdCoord.latitude, longitude:thirdCoord.longitude}
                               ]
-                polygonModel.set(0,{coordsArray : list})
-//                polygonModel.append({coordsArray : list}) //ломает отрисовку у Repeater
+                polygonModel.append({coordsArray : list}) //ломает отрисовку у Repeater
                 }
             }
         }
 
 
-
-        Repeater {
-            id:polygonDelegate
-            model : polygonModel
-
-            MapPolygon {
+        MapItemView {
+                model: polygonModel
+                delegate:MapPolygon {
                 color: "red"
                 path: [
                        polygonModel.get(index).coordsArray.get(0),
@@ -94,9 +70,9 @@ ApplicationWindow {
                         }
                     }
                 }
+            }
 
 
             }
-        }
     }
 }
