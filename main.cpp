@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     Radar radar;
     engine.rootContext()->setContextProperty("radar", &radar);
 
-    qmlRegisterType<Radar>("Radar", 1,0, "Radar");
+    //qmlRegisterType<Radar>("Radar", 1,0, "Radar");
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

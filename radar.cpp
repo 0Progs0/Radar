@@ -1,6 +1,14 @@
 #include "radar.h"
 #include <QtMath>
 #include <iostream>
+#include <QDataStream>
+
+Radar::Radar(QObject *parent) : QAbstractListModel(parent)
+{
+    socket = new QTcpSocket;
+    connect(socket, &QTcpSocket::readyRead, this, &Radar::slotReadyRead);
+    connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
+}
 
 int Radar::rowCount(const QModelIndex &parent) const {
     Q_UNUSED(parent)
@@ -21,6 +29,66 @@ QHash<int, QByteArray> Radar::roleNames() const {
     return roles;
 }
 
+void Radar::connectToServer()
+{
+    socket->connectToHost("127.0.0.1", 8080);
+}
+
+void Radar::slotReadyRead()
+{
+    QDataStream input (socket);
+    input.setVersion(QDataStream::Qt_5_13);
+    if (input.status() == QDataStream::Ok)
+    {
+//        qDebug() << "Reading...";
+//        QGeoCoordinate str;
+//        input >> str;
+//        qDebug() << str;
+        qDebug() << "Reading...";
+        for (;;) {
+            if (nextBlockSize ==0)
+            {
+                if (socket->bytesAvailable() < 2)
+                {
+                    break;
+                }
+                input >> nextBlockSize;
+            }
+            if (socket->bytesAvailable() < nextBlockSize)
+            {
+                break;
+            }
+            QGeoCoordinate str;
+            input >> str;
+            qDebug() << str;
+            nextBlockSize = 0;
+            addCoord(str);
+            qDebug() << m_coordinates;
+        }
+    }
+    else
+    {
+        qDebug() << "DataStream error";
+    }
+}
+
+void Radar::sendToServer(QGeoCoordinate str)
+{
+    d_array.clear();
+    QDataStream output (&d_array, QIODevice::WriteOnly);
+    output.setVersion(QDataStream::Qt_5_13);
+    output << quint16(0) << str;
+    output.device()->seek(0);
+    output << quint16(d_array.size() - sizeof (quint16));
+    socket->write(d_array);
+}
+
+void Radar::addCoord(const QGeoCoordinate &coordinate)
+{
+    beginInsertRows(QModelIndex(), rowCount(), rowCount());
+           m_coordinates.append(coordinate);
+           endInsertRows();
+}
 
 QGeoCoordinate Radar::findFirstVertex(const QGeoCoordinate &coordinate)
 {
